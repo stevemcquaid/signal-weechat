@@ -49,6 +49,10 @@ RUN apt-get -y install \
 RUN pip install --upgrade pip
 RUN pip install qrcode
 
+# Dbus fixes
+RUN echo "export DISPLAY=:0" >> /etc/bash.bashrc
+RUN echo 'export $(dbus-launch)' >> /etc/bash.bashrc
+
 # No need to do this due to volume mount for development purposes
 # Install signal-weechat
 # RUN apt-get -y install git
@@ -57,7 +61,7 @@ RUN pip install qrcode
 # RUN cp -p signal-weechat/signal.py ~/.weechat/python/autoload/signal.py
 
 # Remove this for testing
-RUN adduser --disabled-login --gecos '' guest
+# RUN adduser --disabled-login --gecos '' guest
 
 # This must be done in bash.bashrc since the volume mount gets run after buildtime
 RUN if id -u guest >/dev/null 2>&1; then     echo "cp -p /signal-weechat/signal.py /home/guest/.weechat/python/autoload/signal.py" >> /etc/bash.bashrc; else     echo "cp -p /signal-weechat/signal.py /root/.weechat/python/autoload/signal.py" >> /etc/bash.bashrc; fi 
@@ -65,12 +69,12 @@ RUN if id -u guest >/dev/null 2>&1; then     echo "cp -p /signal-weechat/signal.
 RUN echo "weechat" >> /etc/bash.bashrc
 
 # Remove this for testing
-USER guest
-WORKDIR /home/guest
+# USER guest
+# WORKDIR /home/guest
 
 
 
-# Dbus fixes
+
 
 
 RUN \
