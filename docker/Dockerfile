@@ -57,16 +57,21 @@ RUN pip install qrcode
 # RUN cp -p signal-weechat/signal.py ~/.weechat/python/autoload/signal.py
 
 # Remove this for testing
-# RUN adduser --disabled-login --gecos '' guest
-# USER guest
-# WORKDIR /home/guest
+RUN adduser --disabled-login --gecos '' guest
 
-# RUN echo "export TZ=US/Pacific" >> /etc/bash.bashrc
 # This must be done in bash.bashrc since the volume mount gets run after buildtime
-RUN echo "cp -p /signal-weechat/signal.py ~/.weechat/python/autoload/signal.py" >> /etc/bash.bashrc
+RUN if id -u guest >/dev/null 2>&1; then     echo "cp -p /signal-weechat/signal.py /home/guest/.weechat/python/autoload/signal.py" >> /etc/bash.bashrc; else     echo "cp -p /signal-weechat/signal.py /root/.weechat/python/autoload/signal.py" >> /etc/bash.bashrc; fi 
+# RUN echo "export TZ=US/Pacific" >> /etc/bash.bashrc
 RUN echo "weechat" >> /etc/bash.bashrc
 
+# Remove this for testing
+USER guest
+WORKDIR /home/guest
+
+
+
 # Dbus fixes
+
 
 RUN \
     # enable otr \
