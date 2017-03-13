@@ -29,11 +29,7 @@ RUN apt-get -y install \
     bitlbee 
 
 # Install LE root cert
-RUN apt-get -y install wget tar curl
-RUN wget http://curl.haxx.se/download/curl-7.53.1.tar.gz
-RUN mkdir /curl-7.53.1
-RUN tar xzvf curl-7.53.1.tar.gz -C /
-RUN curl-7.53.1/lib/mk-ca-bundle.pl
+RUN apt-get -y install wget tar curl ca-certificates
 
 # Install Java
 RUN apt-get -y install default-jre
@@ -53,21 +49,24 @@ RUN apt-get -y install \
 RUN pip install --upgrade pip
 RUN pip install qrcode
 
-# Install weechat-signal
-RUN apt-get -y install git
-RUN git clone https://github.com/thefinn93/signal-weechat.git
+# No need to do this due to volume mount for development purposes
+# Install signal-weechat
+# RUN apt-get -y install git
+# RUN git clone https://github.com/thefinn93/signal-weechat.git
 # RUN chmod o+r /signal-weechat/*
-# RUN cp signal-weechat/signal.py /home/guest/.weechat/python/autoload/signal.py
-# Either link to an existing device: /signal link or register a new account: /signal register +12024561414
-
-# RUN echo "export TZ=US/Pacific" >> /etc/bash.bashrc
-RUN echo "cp /signal-weechat/signal.py /home/guest/.weechat/python/autoload/signal.py" >> /etc/bash.bashrc
-RUN echo "weechat" >> /etc/bash.bashrc
+# RUN cp -p signal-weechat/signal.py ~/.weechat/python/autoload/signal.py
 
 # Remove this for testing
-RUN adduser --disabled-login --gecos '' guest
-USER guest
-WORKDIR /home/guest
+# RUN adduser --disabled-login --gecos '' guest
+# USER guest
+# WORKDIR /home/guest
+
+# RUN echo "export TZ=US/Pacific" >> /etc/bash.bashrc
+# This must be done in bash.bashrc since the volume mount gets run after buildtime
+RUN echo "cp -p /signal-weechat/signal.py ~/.weechat/python/autoload/signal.py" >> /etc/bash.bashrc
+RUN echo "weechat" >> /etc/bash.bashrc
+
+# Dbus fixes
 
 RUN \
     # enable otr \
@@ -80,7 +79,9 @@ RUN \
     echo /server add freenode chat.freenode.net >> config.txt && \
     echo /set irc.server.freenode.addresses \"chat.freenode.net/7000\" >> config.txt && \
     echo /set irc.server.freenode.ssl on >> config.txt && \
-    echo /set weechat.network.gnutls_ca_file "/curl-7.53.1/lib/ca-bundle.crt" >> config.txt && \
+     \
+    # Run autoloading stuff for signal-weechat  \
+    \
     echo 
 
 # Use config.txt only if no weechat configuration exists.
